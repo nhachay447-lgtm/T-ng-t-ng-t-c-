@@ -1,94 +1,64 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<title>Dịch vụ Marketing</title>
-<style>
-body {
-  font-family: Arial;
-  background: #f5f5f5;
-  margin: 0;
-}
+import time
+import threading
+import tkinter as tk
+from twilio.rest import Client
 
-.header {
-  background: #111;
-  color: white;
-  padding: 15px;
-  text-align: center;
-  font-size: 20px;
-}
+# Twilio config
+account_sid = "YOUR_SID"
+auth_token = "YOUR_TOKEN"
+client = Client(account_sid, auth_token)
 
-.box {
-  max-width: 400px;
-  background: white;
-  margin: 30px auto;
-  padding: 20px;
-  border-radius: 10px;
-}
+numbers = ["+8490xxxxxxx", "+8491xxxxxxx"]
 
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-}
+paused = False
+stopped = False
 
-button {
-  width: 100%;
-  padding: 12px;
-  background: green;
-  color: white;
-  border: none;
-  margin-top: 15px;
-}
+def send_sms():
+    global paused, stopped
+    for num in numbers:
+        if stopped:
+            print("⛔ Đã dừng hoàn toàn")
+            break
 
-.success {
-  color: green;
-  text-align: center;
-  margin-top: 15px;
-}
-</style>
-</head>
+        while paused:
+            time.sleep(1)
 
-<body>
+        client.messages.create(
+            body="Thong bao hop le",
+            from_="+1XXXXXXXXXX",
+            to=num
+        )
+        print("Sent to", num)
 
-<div class="header">DỊCH VỤ MARKETING ONLINE</div>
+        time.sleep(3)
 
-<div class="box">
+def start():
+    global stopped
+    stopped = False
+    threading.Thread(target=send_sms).start()
 
-<input id="link" placeholder="Link TikTok / Facebook">
+def pause():
+    global paused
+    paused = True
+    print("⏸️ Pause")
 
-<select id="service">
-  <option value="50000">Tăng follow Tiktok - 30.000đ</option>
-  <option value="100000">Tăng tương tim bài viết - 10.000đ</option>
-  <option value="200000">Viu TikTok  - 0.040đ</option>
-</select>
+def resume():
+    global paused
+    paused = False
+    print("▶️ Resume")
 
-<input id="amount" type="number" placeholder="Số lượng">
+def stop():
+    global stopped
+    stopped = True
+    print("⛔ Stop")
 
-<button onclick="order()">Đặt dịch vụ</button>
+# GUI
+root = tk.Tk()
+root.title("SMS Sender")
 
-<div id="msg" class="success"></div>
+tk.Button(root, text="Start", command=start, width=15).pack(pady=5)
+tk.Button(root, text="Pause", command=pause, width=15).pack(pady=5)
+tk.Button(root, text="Resume", command=resume, width=15).pack(pady=5)
+tk.Button(root, text="Stop", command=stop, width=15).pack(pady=5)
 
-</div>
-
-<script>
-function order() {
-  let link = document.getElementById("link").value;
-  let amount = document.getElementById("amount").value;
-  let price = document.getElementById("service").value;
-
-  if(link === "" || amount === "") {
-    alert("Nhập đầy đủ thông tin");
-    return;
-  }
-
-  let total = price * amount;
-
-  document.getElementById("msg").innerHTML =
-    "✅ Đã tạo đơn thành công<br>" +
-    "💰 Tổng tiền: " + total.toLocaleString() + "đ";
-}
-</script>
-
-</body>
-</html>
+root.mainloop() có 
